@@ -1,0 +1,3 @@
+type ConnectionStatus = {
+  isConnected: boolean;
+};

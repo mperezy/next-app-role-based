@@ -1,11 +1,18 @@
-import { MongoClient, ServerApiVersion } from "mongodb";
+import type { MongoClientOptions } from 'mongodb';
+import { MongoClient, ServerApiVersion } from 'mongodb';
 
 if (!process.env.MONGODB_URI) {
   throw new Error('Invalid/Missing environment variable: "MONGODB_URI"');
 }
 
+if (!process.env.MONGO_ROOT_DATABASE) {
+  throw new Error(
+    'There is no database name initialized in environment variable "MONGO_ROOT_DATABASE"',
+  );
+}
+
 const uri = process.env.MONGODB_URI;
-const options = {
+const options: MongoClientOptions = {
   serverApi: {
     version: ServerApiVersion.v1,
     strict: true,
@@ -16,10 +23,10 @@ const options = {
 let client;
 let clientPromise: Promise<MongoClient>;
 
-if (process.env.NODE_ENV === "development") {
+if (process.env.NODE_ENV === 'development') {
   // In development mode, use a global variable so that the value
   // is preserved across module reloads caused by HMR (Hot Module Replacement).
-  let globalWithMongo = global as typeof globalThis & {
+  const globalWithMongo = global as typeof globalThis & {
     _mongoClientPromise?: Promise<MongoClient>;
   };
 
