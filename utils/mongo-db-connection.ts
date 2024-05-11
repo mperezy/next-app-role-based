@@ -1,8 +1,18 @@
 import clientPromise from 'lib/mongodb';
 
+export const databasePromise = async () => {
+  try {
+    const mongoClient = await clientPromise();
+
+    return mongoClient.db(process.env.MONGO_ROOT_DATABASE);
+  } catch (error) {
+    console.error('**** Error on get database: ', { error });
+  }
+};
+
 export default async () => {
   try {
-    await clientPromise;
+    await clientPromise();
     // `await clientPromise` will use the default database passed in the MONGODB_URI
     // However you can use another database (e.g. myDatabase) by replacing the `await clientPromise` with the following code:
     //

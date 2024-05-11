@@ -25,7 +25,7 @@ type Props = {
 
 export default ({ children, isDBConnected }: Props) => {
   const { route } = useRouter();
-  const isMobile = useMediaQuery(`(max-width: ${em(767)})`);
+  const isMobile = useMediaQuery(`(max-width: ${em(768)})`);
   const [navbarOpened, setNavbarOpened] = useLocalStorage({
     key: 'navbar-opened',
     getInitialValueInEffect: false,
@@ -73,6 +73,11 @@ export default ({ children, isDBConnected }: Props) => {
                 leftSection={icon}
                 py='sm'
                 style={{ borderRadius: '.5rem' }}
+                onClick={() => {
+                  if (isMobile) {
+                    setNavbarOpened(false);
+                  }
+                }}
               />
               {index < arr.length - 1 && <Divider color='#CDCDCD' />}
             </Stack>
@@ -97,9 +102,9 @@ export default ({ children, isDBConnected }: Props) => {
         pt={0}
         mt='var(--app-shell-header-height)'
         mih='calc(100dvh - var(--app-shell-header-height))'
-        h={isMobile ? '100%' : 'calc(100dvh - var(--app-shell-header-height))'}
+        h={'calc(100dvh - var(--app-shell-header-height))'}
       >
-        <Box w='100%' h='100%' p='xl'>
+        <Box w='100%' h='100%' p='xl' style={{ overflow: 'auto' }}>
           {children}
         </Box>
       </AppShell.Main>

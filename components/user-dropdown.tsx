@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { MdOutlineLogout, MdChevronRight } from 'react-icons/md';
 import { Avatar, em, Flex, Menu, Stack, Text } from '@mantine/core';
