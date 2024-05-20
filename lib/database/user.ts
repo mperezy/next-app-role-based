@@ -3,8 +3,6 @@ import { databasePromise } from 'utils/mongo-db-connection';
 
 const USERS_COLLECTION = 'users';
 
-type Role = 'Admin' | 'Moderator' | 'Viewer';
-
 type UserDTO = {
   userId: string;
   role?: Role;
@@ -39,7 +37,6 @@ export const getUserById = async (userId: string) => {
 };
 
 export const assignRoleToUser = async (userId: string, role: Role) => {
-  console.log({ userId, role });
   try {
     const database = await databasePromise();
 
@@ -48,5 +45,17 @@ export const assignRoleToUser = async (userId: string, role: Role) => {
     }
   } catch (error) {
     console.error('**** Error on assign role to user: ', { error });
+  }
+};
+
+export const deleteUser = async (userId: string) => {
+  try {
+    const database = await databasePromise();
+
+    if (database) {
+      await userCollection(database).deleteOne({ userId });
+    }
+  } catch (error) {
+    console.error('**** Error on delete user: ', { error });
   }
 };

@@ -2,6 +2,8 @@ type ConnectionStatus = {
   isConnected: boolean;
 };
 
+type Role = 'Admin' | 'Moderator' | 'Viewer';
+
 type Auth0User = {
   created_at: string;
   picture: string;

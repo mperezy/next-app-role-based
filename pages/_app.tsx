@@ -1,18 +1,19 @@
 import type { AppProps } from 'next/app';
-import { Space_Grotesk } from 'next/font/google';
 import { MantineProvider } from '@mantine/core';
+import { spaceGrotesk } from 'fonts';
 import Auth0Provider from 'providers/auth0-provider';
+import ModalProvider from 'providers/modal';
 import mantineTheme from 'mantine-theme';
 
 import '@mantine/core/styles.css';
-
-const spaceGrotesk = Space_Grotesk({ subsets: ['latin'] });
 
 export default ({ Component, pageProps }: AppProps) => (
   <MantineProvider theme={mantineTheme}>
     <Auth0Provider>
       <div className={spaceGrotesk.className}>
-        <Component {...pageProps} />
+        <ModalProvider>
+          <Component {...pageProps} />
+        </ModalProvider>
       </div>
     </Auth0Provider>
   </MantineProvider>

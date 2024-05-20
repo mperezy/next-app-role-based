@@ -1,6 +1,11 @@
-import { AppShell, createTheme, NavLink, Text } from '@mantine/core';
+import { AppShell, createTheme, Modal, NavLink, Text } from '@mantine/core';
+import { spaceGrotesk } from 'fonts';
 
 export default createTheme({
+  fontFamily: spaceGrotesk.style.fontFamily,
+  headings: {
+    fontFamily: spaceGrotesk.style.fontFamily,
+  },
   components: {
     AppShellHeader: AppShell.Header.extend({
       defaultProps: {
@@ -15,6 +20,14 @@ export default createTheme({
     AppShellMain: AppShell.Main.extend({
       defaultProps: {
         bg: '#F5F5F5',
+      },
+    }),
+    Modal: Modal.extend({
+      styles: {
+        title: {
+          fontWeight: 700,
+          fontSize: '1.5rem',
+        },
       },
     }),
     NavLink: NavLink.extend({
