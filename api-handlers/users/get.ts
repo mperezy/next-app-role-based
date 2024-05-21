@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import validateRequest from 'api-handlers/validate-request';
+import { getUserById } from 'lib/database/user';
 import getAccessToken from 'utils/get-access-token';
 import parseError from 'utils/parse-error';
 
@@ -17,7 +18,15 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       .then((res) => res.json())
       .then((result) => result);
 
-    res.status(200).json({ users });
+    const usersWithRole = await Promise.all<Auth0User[]>(
+      users.map(async (user: Auth0User) => {
+        const userFromDB = await getUserById(user.user_id);
+
+        return { ...user, role: userFromDB?.role };
+      }),
+    );
+
+    res.status(200).json({ users: usersWithRole });
   } catch (error) {
     console.log('**** Error on get users: ', { error });
     res.status(500).json({ statusCode: 500, message: parseError(error).message });

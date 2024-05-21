@@ -1,24 +1,36 @@
-import { TextInput, Select, Stack } from '@mantine/core';
+import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
+import { TextInput, Select, Stack, Checkbox } from '@mantine/core';
 import FormModal from 'components/form-modal';
+import { useAuth0User } from 'providers/auth0-provider';
 import type { ModalBaseProps } from 'providers/modal/types';
 
-type Props = ModalBaseProps & Pick<Auth0User, 'user_id' | 'email' | 'name' | 'nickname'>;
+type Props = ModalBaseProps & Pick<Auth0User, 'user_id' | 'email' | 'name' | 'nickname' | 'role'>;
 
 type UserDto = {
   user_id: string;
   email: string;
   name: string;
   nickname: string;
+  password: string;
+  confirmPassword: string;
   role: Role | '';
 };
 
 export default (props: Props) => {
+  const [submitLoading, setSubmitLoading] = useState<boolean>(false);
+  const [updatePassword, setUpdatePassword] = useState<boolean>(false);
+  const {
+    user: { accessToken },
+  } = useAuth0User();
   const {
     control,
     formState: { isDirty },
     handleSubmit,
     reset,
+    setError,
+    clearErrors,
+    setValue,
     watch,
   } = useForm<UserDto>({
     values: {
@@ -26,22 +38,77 @@ export default (props: Props) => {
       email: props.email,
       name: props.name,
       nickname: props.nickname,
-      role: '',
+      password: '',
+      confirmPassword: '',
+      role: props.role,
     },
   });
 
-  const { email, name, nickname, role } = watch();
+  const { email, name, nickname, password, confirmPassword, role } = watch();
 
-  const isSubmitDisabled = !email || !name || !nickname || !role;
+  const isSubmitDisabledWithPassword =
+    updatePassword && (!password || !confirmPassword || password !== confirmPassword);
+  const isSubmitDisabled = !email || !name || !nickname || !role || isSubmitDisabledWithPassword;
 
-  const onSubmit = async () => {};
+  const onSubmit = async (data: UserDto) => {
+    setSubmitLoading(true);
+
+    try {
+      const response = await fetch(`/api/users`, {
+        method: 'PATCH',
+        body: JSON.stringify({
+          userId: data.user_id,
+          email: data.email,
+          name: data.name,
+          nickname: data.nickname,
+          updatePassword,
+          password: data.password,
+          role: data.role,
+        }),
+        headers: { Authorization: `Bearer ${accessToken}` },
+      }).then((res) => res.json());
+
+      if (response.status >= 400) {
+        // TODO: Handle errors here...
+      } else {
+        props.onClose();
+        reset();
+      }
+
+      setSubmitLoading(false);
+    } catch (error) {
+      console.log(error);
+      setSubmitLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (confirmPassword && confirmPassword !== password) {
+      setError('confirmPassword', { message: 'The passwords must match.' });
+    } else {
+      clearErrors('confirmPassword');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [confirmPassword, password]);
+
+  useEffect(() => {
+    if (!updatePassword) {
+      setValue('password', '');
+      setValue('confirmPassword', '');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [updatePassword]);
 
   return (
     <FormModal
       {...props}
       disabled={isSubmitDisabled}
       formIsDirty={isDirty}
-      resetForm={reset}
+      loading={submitLoading}
+      resetForm={() => {
+        reset();
+        setUpdatePassword(false);
+      }}
       onSubmit={handleSubmit(onSubmit)}
       texts={{ title: 'Add user', submitButton: 'Edit user' }}
     >
@@ -61,6 +128,42 @@ export default (props: Props) => {
           name='nickname'
           render={({ field }) => <TextInput {...field} required label='Nickname' />}
         />
+        <Stack mt='xs'>
+          <Checkbox
+            label='Change password'
+            onChange={({ currentTarget: { checked } }) => setUpdatePassword(checked)}
+          />
+          <Stack>
+            <Controller
+              control={control}
+              name='password'
+              render={({ field, fieldState }) => (
+                <TextInput
+                  {...field}
+                  required
+                  disabled={!updatePassword}
+                  type='password'
+                  label='Password'
+                  error={fieldState.error?.message}
+                />
+              )}
+            />
+            <Controller
+              control={control}
+              name='confirmPassword'
+              render={({ field, fieldState }) => (
+                <TextInput
+                  {...field}
+                  required
+                  disabled={!updatePassword}
+                  type='password'
+                  label='Confirm password'
+                  error={fieldState.error?.message}
+                />
+              )}
+            />
+          </Stack>
+        </Stack>
         <Controller
           control={control}
           name='role'

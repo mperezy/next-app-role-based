@@ -18,4 +18,5 @@ type Auth0User = {
   last_login: string;
   last_ip: string;
   logins_count: number;
+  role: Role;
 };

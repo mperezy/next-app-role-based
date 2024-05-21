@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { getUsers, postUser, deleteUser } from 'api-handlers/users';
+import { getUsers, postUser, deleteUser, patchUser } from 'api-handlers/users';
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   const { method } = req;
@@ -18,6 +18,12 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
   if (method === 'DELETE') {
     await deleteUser(req, res);
+
+    return;
+  }
+
+  if (method === 'PATCH') {
+    await patchUser(req, res);
 
     return;
   }

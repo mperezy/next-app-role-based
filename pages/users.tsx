@@ -26,8 +26,9 @@ export default ({ isConnected }: InferGetServerSidePropsType<typeof getServerSid
 
   const handleAddUser = () => openAddUserModal({ refetch });
 
-  const handleEditUser = (user: Pick<Auth0User, 'user_id' | 'email' | 'name' | 'nickname'>) =>
-    openEditUserModal({ ...user });
+  const handleEditUser = (
+    user: Pick<Auth0User, 'user_id' | 'email' | 'name' | 'nickname' | 'role'>,
+  ) => openEditUserModal({ ...user });
 
   const handleDeleteUser = async (userId: string) =>
     openConfirmModal({
@@ -70,7 +71,7 @@ export default ({ isConnected }: InferGetServerSidePropsType<typeof getServerSid
                   </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>
-                  {users.map(({ user_id, picture, name, nickname, email }, index) => (
+                  {users.map(({ user_id, picture, name, nickname, email, role }, index) => (
                     <Table.Tr key={index}>
                       <Table.Td align='center'>
                         <Avatar src={picture} w={40} h={40} />
@@ -82,7 +83,7 @@ export default ({ isConnected }: InferGetServerSidePropsType<typeof getServerSid
                         <Flex align='center' gap='xs'>
                           <ActionIcon
                             size='lg'
-                            onClick={() => handleEditUser({ user_id, name, nickname, email })}
+                            onClick={() => handleEditUser({ user_id, name, nickname, email, role })}
                           >
                             <MdCreate size='1.3rem' />
                           </ActionIcon>
