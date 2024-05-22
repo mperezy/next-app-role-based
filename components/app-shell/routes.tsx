@@ -1,8 +1,13 @@
 import type { ReactNode } from 'react';
-import { MdGroups, MdOutlineHome } from 'react-icons/md';
+import {
+  MdGroups,
+  MdOutlineAdminPanelSettings,
+  MdOutlineHome,
+  MdOutlineLocalPolice,
+} from 'react-icons/md';
 import { Loader } from '@mantine/core';
 
-type Path = '/' | '/test-loader' | '/users';
+export type Path = '/' | '/test-loader' | '/users' | '/moderator-page' | '/admin-page';
 
 type Route = {
   href: Path;
@@ -25,5 +30,15 @@ export default [
     href: '/users',
     title: 'Users',
     icon: <MdGroups size='1.5rem' />,
+  },
+  {
+    href: '/moderator',
+    title: 'Moderator page',
+    icon: <MdOutlineLocalPolice size='1.5rem' />,
+  },
+  {
+    href: '/admin',
+    title: 'Admin page',
+    icon: <MdOutlineAdminPanelSettings size='1.5rem' />,
   },
 ] as Route[];

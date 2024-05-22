@@ -1,14 +1,16 @@
 import type { GetServerSideProps } from 'next';
-import Head from 'next/head';
 import { type InferGetServerSidePropsType } from 'next';
+import Head from 'next/head';
 import { MdCreate, MdDelete } from 'react-icons/md';
 import { ActionIcon, Avatar, Button, Flex, Stack, Table, Title } from '@mantine/core';
 import AddUserFormModal from 'components/add-user-form-modal';
 import AppShell from 'components/app-shell';
 import ConfirmModal from 'components/confirm-modal';
 import EditUserFormModal from 'components/edit-user-form-modal';
+import PopoverHint from 'components/popover-hint';
 import Spinner from 'components/spinner';
 import useUsers from 'hooks/use-users';
+import { Permissions, usePermissions } from 'permissions';
 import { useAuth0User } from 'providers/auth0-provider';
 import useModal from 'providers/modal/use-modal';
 import mongoDbConnection from 'utils/mongo-db-connection';
@@ -19,10 +21,16 @@ export default ({ isConnected }: InferGetServerSidePropsType<typeof getServerSid
   const {
     user: { accessToken },
   } = useAuth0User();
+  const { userHasPermission } = usePermissions();
   const [openAddUserModal] = useModal(AddUserFormModal);
   const [openConfirmModal, closeConfirmModal] = useModal(ConfirmModal);
   const [openEditUserModal] = useModal(EditUserFormModal);
   const { users, refetch } = useUsers();
+
+  // Permissions
+  const canCreateUsers = userHasPermission(Permissions.CreateUsers);
+  const canUpdateUsers = userHasPermission(Permissions.UpdateUsers);
+  const canDeleteUsers = userHasPermission(Permissions.DeleteUsers);
 
   const handleAddUser = () => openAddUserModal({ refetch });
 
@@ -53,7 +61,11 @@ export default ({ isConnected }: InferGetServerSidePropsType<typeof getServerSid
         {users && (
           <Flex align='center' justify='space-between'>
             <Title order={2}>Users</Title>
-            <Button onClick={handleAddUser}>Add user</Button>
+            <PopoverHint disabled={canCreateUsers} text='Only admins can create users'>
+              <Button onClick={handleAddUser} disabled={!canCreateUsers}>
+                Add user
+              </Button>
+            </PopoverHint>
           </Flex>
         )}
 
@@ -81,21 +93,35 @@ export default ({ isConnected }: InferGetServerSidePropsType<typeof getServerSid
                       <Table.Td>{email}</Table.Td>
                       <Table.Td>
                         <Flex align='center' gap='xs'>
-                          <ActionIcon
-                            size='lg'
-                            onClick={() => handleEditUser({ user_id, name, nickname, email, role })}
+                          <PopoverHint
+                            disabled={canUpdateUsers}
+                            text='Only admins and moderators can update users'
                           >
-                            <MdCreate size='1.3rem' />
-                          </ActionIcon>
+                            <ActionIcon
+                              size='lg'
+                              disabled={!canUpdateUsers}
+                              onClick={() =>
+                                handleEditUser({ user_id, name, nickname, email, role })
+                              }
+                            >
+                              <MdCreate size='1.3rem' />
+                            </ActionIcon>
+                          </PopoverHint>
 
-                          <ActionIcon
-                            size='lg'
-                            variant='filled'
-                            color='red'
-                            onClick={() => handleDeleteUser(user_id)}
+                          <PopoverHint
+                            disabled={canDeleteUsers}
+                            text='Only admins can delete users.'
                           >
-                            <MdDelete size='1.3rem' />
-                          </ActionIcon>
+                            <ActionIcon
+                              size='lg'
+                              variant='filled'
+                              color='red'
+                              disabled={!canDeleteUsers}
+                              onClick={() => handleDeleteUser(user_id)}
+                            >
+                              <MdDelete size='1.3rem' />
+                            </ActionIcon>
+                          </PopoverHint>
                         </Flex>
                       </Table.Td>
                     </Table.Tr>

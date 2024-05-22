@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
+import type { IconBaseProps } from 'react-icons';
 import { MdOutlineLogout, MdChevronRight } from 'react-icons/md';
 import { Avatar, em, Flex, Menu, Stack, Text } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
 import { useAuth0User } from 'providers/auth0-provider';
-import type { IconBaseProps } from 'react-icons';
 
 export default () => {
   const isMobile = useMediaQuery(`(max-width: ${em(767)})`);
@@ -16,10 +16,10 @@ export default () => {
 
   const UserData = ({ color }: { color: IconBaseProps['color'] }) => (
     <>
-      <Text c={color} size='sm' fw={700}>
+      <Text c={color} size='sm' fw={700} truncate>
         {user?.name}
       </Text>
-      <Text c={color} size='sm'>
+      <Text c={color} size='sm' truncate>
         {user?.email}
       </Text>
     </>
@@ -32,6 +32,7 @@ export default () => {
       opened={opened}
       onChange={setOpened}
       offset={13}
+      withinPortal={false}
     >
       <Menu.Target>
         <Flex align='center' gap={isMobile ? '.5rem' : '1rem'} style={{ cursor: 'pointer' }}>
@@ -48,6 +49,7 @@ export default () => {
           <UserData color='#000' />
         </Stack>
         <Menu.Divider hiddenFrom='sm'></Menu.Divider>
+        <Menu.Label>You are: {user.role}</Menu.Label>
         <Menu.Item leftSection={<MdOutlineLogout />} onClick={handleLogout}>
           Logout
         </Menu.Item>

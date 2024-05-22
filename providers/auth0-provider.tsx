@@ -11,10 +11,13 @@ type GetAccessToken = {
   token_type: 'Bearer';
 };
 
-type UseAuth0Context = Omit<UserContext, 'user'> & { user: UserProfile & GetAccessToken };
+type UseAuth0Context = Omit<UserContext, 'user'> & {
+  user: UserProfile & GetAccessToken & { role: Role };
+};
 
 export const useAuth0User = () => {
   const config = useUser();
+
   if (!config) {
     throw new Error('Called useAuth0User outside of its context');
   }
@@ -40,7 +43,7 @@ export default ({ children }: { children: ReactNode }) => {
   const Layout = withPageAuthRequired(() => <Root>{children}</Root>, {
     onError: () => <>Error...</>,
     onRedirecting: () => <Spinner screenHeight />,
-    returnTo: '',
+    returnTo: '/',
   });
 
   return (
