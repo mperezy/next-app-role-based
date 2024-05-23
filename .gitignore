@@ -4,6 +4,7 @@
 /node_modules
 /.pnp
 .pnp.js
+.yarn/
 .yarn/install-state.gz
 
 # testing
@@ -39,3 +40,4 @@ next-env.d.ts
 .idea/*
 
 mongodb_data/*
+*storybook.log

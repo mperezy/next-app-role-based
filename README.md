@@ -9,7 +9,8 @@
 
 - Docker and Docker compose (For MongoDB container)
 - Nodejs +20
-- Yarn
+- Corepack
+- Yarn 3.8.2
 - Auth0
 
 ## What was used here
@@ -19,6 +20,15 @@
 - React
 - Mantine (For UI Components)
 - MongoDB
+
+## Initialize project
+
+- Since this project is using `yarn@3.8.2` with corepack enabled, you need to initialize the project like so:
+```shell
+$ ./init.sh
+```
+
+- This step needs to be executed just once.
 
 ## How to run
 
