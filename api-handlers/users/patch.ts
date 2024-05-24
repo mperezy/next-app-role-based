@@ -1,12 +1,21 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import validateRequest from 'api-handlers/validate-request';
+import verifyRolePermissions from 'api-handlers/verify-role-permissions';
 import { assignRoleToUser, getUserById } from 'lib/database/user';
+import { Permissions } from 'permissions';
 import getAccessToken from 'utils/get-access-token';
 import parseError from 'utils/parse-error';
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     validateRequest(req, res);
+    await verifyRolePermissions(
+      req,
+      res,
+      [Permissions.UpdateUsers, Permissions.UpdatePasswordUsers],
+      true,
+    );
+
     const accessToken = await getAccessToken();
     const { body } = req;
     const bodyParsed = JSON.parse(body);

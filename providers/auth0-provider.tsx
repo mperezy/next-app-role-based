@@ -1,9 +1,10 @@
 import type { ReactNode } from 'react';
+import { useRouter } from 'next/router';
 import type { UserContext, UserProfile } from '@auth0/nextjs-auth0/client';
 import { UserProvider, withPageAuthRequired, useUser } from '@auth0/nextjs-auth0/client';
 import Spinner from 'components/spinner';
 
-type GetAccessToken = {
+type AccessTokenData = {
   accessToken: string;
   accessTokenExpiresAt: number;
   accessTokenScope: string;
@@ -11,8 +12,8 @@ type GetAccessToken = {
   token_type: 'Bearer';
 };
 
-type UseAuth0Context = Omit<UserContext, 'user'> & {
-  user: UserProfile & GetAccessToken & { role: Role };
+export type RoleBasedAuth0Context = Omit<UserContext, 'user'> & {
+  user: UserProfile & AccessTokenData & { role: Role };
 };
 
 export const useAuth0User = () => {
@@ -22,7 +23,7 @@ export const useAuth0User = () => {
     throw new Error('Called useAuth0User outside of its context');
   }
 
-  return config as UseAuth0Context;
+  return config as RoleBasedAuth0Context;
 };
 
 type Props = {
@@ -40,10 +41,12 @@ const Root = ({ children }: Props) => {
 };
 
 export default ({ children }: { children: ReactNode }) => {
+  const { pathname: returnTo } = useRouter();
+
   const Layout = withPageAuthRequired(() => <Root>{children}</Root>, {
     onError: () => <>Error...</>,
     onRedirecting: () => <Spinner screenHeight />,
-    returnTo: '/',
+    returnTo,
   });
 
   return (

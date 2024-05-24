@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
-import type Permissions from 'permissions/permissions';
-import { permissionsMap } from 'permissions/permissions';
+import type { Permissions } from 'permissions';
+import { roleHasPermissions } from 'permissions';
 import { useAuth0User } from 'providers/auth0-provider';
 
 type Result = {
@@ -13,11 +13,7 @@ export default (): Result => {
   } = useAuth0User();
 
   const userHasPermission = useCallback(
-    (permissions: Permissions[] | Permissions) => {
-      const permissionsArr = Array.isArray(permissions) ? permissions : [permissions];
-
-      return permissionsArr.some((permission) => permissionsMap[role].includes(permission));
-    },
+    (permissions: Permissions[] | Permissions) => roleHasPermissions(role, permissions),
     [role],
   );
 

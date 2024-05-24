@@ -1,6 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import validateRequest from 'api-handlers/validate-request';
+import verifyRolePermissions from 'api-handlers/verify-role-permissions';
 import { createUser } from 'lib/database/user';
+import { Permissions } from 'permissions';
 import getAccessToken from 'utils/get-access-token';
 import parseError from 'utils/parse-error';
 
@@ -30,6 +32,7 @@ const errorTypeParser = (error: string, statusCode: number) => {
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     validateRequest(req, res);
+    await verifyRolePermissions(req, res, Permissions.CreateUsers);
 
     const body = (() => {
       const { body } = req;

@@ -10,7 +10,7 @@
 - Docker and Docker compose (For MongoDB container)
 - Nodejs +20
 - Yarn
-- Auth0
+- Auth0 (Regular Web Application + Machine to Machine)
 
 ## What was used here
 
@@ -29,4 +29,4 @@
 
 ### Ready to go!
 
-- Now just need to run `yarn dev`, the app will be running at http://localhost:3000.
+- Now just need to run `yarn dev`, the app will be exposed at http://localhost:3000.

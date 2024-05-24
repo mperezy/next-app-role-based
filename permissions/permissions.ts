@@ -20,7 +20,9 @@ enum Permissions {
   ViewAdminPage = 'admin::view',
 }
 
-export const permissionsMap: Record<Role, Permissions[]> = {
+export default Permissions;
+
+const permissionsMap: Record<Role, Permissions[]> = {
   // TODO: A better way to make the next could be have a huge array with all the permissions and filter it based role
 
   Viewer: [Permissions.ViewHome, Permissions.ViewLoader, Permissions.ViewUsers],
@@ -45,4 +47,16 @@ export const permissionsMap: Record<Role, Permissions[]> = {
   ],
 };
 
-export default Permissions;
+export const roleHasPermissions = (
+  role: Role,
+  permissions: Permissions | Permissions[],
+  all?: boolean,
+) => {
+  const permissionsArr = Array.isArray(permissions) ? permissions : [permissions];
+
+  if (all) {
+    return permissionsArr.every((permission) => permissionsMap[role].includes(permission));
+  }
+
+  return permissionsArr.some((permission) => permissionsMap[role].includes(permission));
+};
