@@ -14,38 +14,28 @@
     "ecmaVersion": "latest",
     "sourceType": "module"
   },
-  "plugins": [
-    "@typescript-eslint"
-  ],
+  "plugins": ["@typescript-eslint"],
   "rules": {
     "@typescript-eslint/ban-ts-comment": "off",
     "@typescript-eslint/consistent-type-imports": "error",
     "@typescript-eslint/no-unused-vars": "warn",
     "no-trailing-spaces": "error",
-    "object-curly-spacing": [
-      "error",
-      "always"
-    ],
+    "object-curly-spacing": ["error", "always"],
     "no-multiple-empty-lines": [
       "error",
       {
         "max": 1
       }
     ],
-        "indent": [
-          "error",
-          2,
-          {
-            "SwitchCase": 1,
-            "ignoredNodes": [
-              "ConditionalExpression"
-            ]
-          }
-        ],
-    "linebreak-style": [
+    "indent": [
       "error",
-      "unix"
+      2,
+      {
+        "SwitchCase": 1,
+        "ignoredNodes": ["ConditionalExpression"]
+      }
     ],
+    "linebreak-style": ["error", "unix"],
     "max-len": [
       "error",
       {
@@ -54,9 +44,6 @@
       }
     ],
     "react-hooks/exhaustive-deps": "warn",
-    "semi": [
-      "error",
-      "always"
-    ]
+    "semi": ["error", "always"]
   }
 }
