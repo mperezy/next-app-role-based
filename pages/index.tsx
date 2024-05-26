@@ -2,6 +2,7 @@
 import type { InferGetServerSidePropsType, GetServerSideProps } from 'next';
 import Head from 'next/head';
 import AppShell from 'components/app-shell';
+import routes from 'components/app-shell/routes';
 import mongoDbConnection from 'utils/mongo-db-connection';
 
 export const getServerSideProps: GetServerSideProps<ConnectionStatus> = mongoDbConnection;
@@ -10,7 +11,7 @@ export default ({ isConnected }: InferGetServerSidePropsType<typeof getServerSid
   <AppShell isDBConnected={isConnected}>
     <div className='container'>
       <Head>
-        <title>Home | Role App</title>
+        <title>{routes.find(({ href }) => href === '/')!.title} | Role App</title>
         <link rel='icon' href='/favicon.ico' />
       </Head>
 

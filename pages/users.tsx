@@ -5,6 +5,7 @@ import { MdCreate, MdDelete } from 'react-icons/md';
 import { ActionIcon, Avatar, Button, Flex, Stack, Table, Title } from '@mantine/core';
 import AddUserFormModal from 'components/add-user-form-modal';
 import AppShell from 'components/app-shell';
+import routes from 'components/app-shell/routes';
 import ConfirmModal from 'components/confirm-modal';
 import EditUserFormModal from 'components/edit-user-form-modal';
 import PopoverHint from 'components/popover-hint';
@@ -55,7 +56,7 @@ export default ({ isConnected }: InferGetServerSidePropsType<typeof getServerSid
   return (
     <AppShell isDBConnected={isConnected}>
       <Head>
-        <title>Users | Role App</title>
+        <title>{routes.find(({ href }) => href === '/users')!.title} | Role App</title>
       </Head>
       <Stack gap='3rem' h='100%'>
         {users && (

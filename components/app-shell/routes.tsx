@@ -7,7 +7,7 @@ import {
 } from 'react-icons/md';
 import { Loader } from '@mantine/core';
 
-export type Path = '/' | '/test-loader' | '/users' | '/moderator-page' | '/admin-page';
+export type Path = '/' | '/test-loader' | '/users' | '/moderator' | '/admin';
 
 type Route = {
   href: Path;
@@ -15,7 +15,7 @@ type Route = {
   icon: ReactNode;
 };
 
-export default [
+const routes: Route[] = [
   {
     href: '/',
     title: 'Home',
@@ -41,4 +41,6 @@ export default [
     title: 'Admin page',
     icon: <MdOutlineAdminPanelSettings size='1.5rem' />,
   },
-] as Route[];
+];
+
+export default routes;
