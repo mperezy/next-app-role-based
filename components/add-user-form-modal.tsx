@@ -4,6 +4,7 @@ import { TextInput, Select, Stack, Text } from '@mantine/core';
 import FormModal from 'components/form-modal';
 import { useAuth0User } from 'providers/auth0-provider';
 import type { ModalBaseProps } from 'providers/modal/types';
+import createUser from 'services/create-user';
 
 type Props = ModalBaseProps & { refetch: () => void };
 
@@ -45,33 +46,21 @@ export default ({ refetch, ...props }: Props) => {
     clearUnknownError();
 
     try {
-      const response = await fetch('/api/users', {
-        method: 'POST',
-        body: JSON.stringify({
-          email: data.email,
-          name: data.name,
-          nickname: data.nickname,
-          password: data.password,
-          role: data.role,
-        }),
-        headers: { Authorization: `Bearer ${accessToken}` },
-      }).then((res) => res.json());
+      await createUser(accessToken, data);
 
-      if (response.status >= 400) {
-        if (response.field === 'unknown') {
-          setUnknownError(response.message);
-        } else {
-          setError(response.field, { message: response.message });
-        }
-      } else {
-        props.onClose();
-        reset();
-        refetch();
-      }
-
-      setSubmitLoading(false);
+      refetch();
+      props.onClose();
+      reset();
     } catch (error) {
-      console.error({ error });
+      const fetchError = error as FetchError;
+      if (fetchError.cause.statusCode >= 400) {
+        if (fetchError.cause.field === 'unknown') {
+          setUnknownError(fetchError.cause.message);
+        } else {
+          setError(fetchError.cause.field, { message: fetchError.cause.message });
+        }
+      }
+    } finally {
       setSubmitLoading(false);
     }
   };

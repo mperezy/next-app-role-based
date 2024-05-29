@@ -18,5 +18,9 @@ type Auth0User = {
   last_login: string;
   last_ip: string;
   logins_count: number;
-  role: Role;
+  role?: Role;
+};
+
+type FetchError = Omit<Error, 'cause'> & {
+  cause: Record<string, never>;
 };

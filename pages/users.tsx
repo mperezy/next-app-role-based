@@ -1,8 +1,9 @@
 import type { GetServerSideProps } from 'next';
 import { type InferGetServerSidePropsType } from 'next';
 import Head from 'next/head';
+import { useRouter } from 'next/router';
 import { MdCreate, MdDelete } from 'react-icons/md';
-import { ActionIcon, Avatar, Button, Flex, Stack, Table, Title } from '@mantine/core';
+import { ActionIcon, Avatar, Button, Center, Flex, Stack, Table, Text, Title } from '@mantine/core';
 import AddUserFormModal from 'components/add-user-form-modal';
 import AppShell from 'components/app-shell';
 import routes from 'components/app-shell/routes';
@@ -14,11 +15,13 @@ import useUsers from 'hooks/use-users';
 import { Permissions, usePermissions } from 'permissions';
 import { useAuth0User } from 'providers/auth0-provider';
 import useModal from 'providers/modal/use-modal';
+import deleteUser from 'services/delete-user';
 import mongoDbConnection from 'utils/mongo-db-connection';
 
 export const getServerSideProps: GetServerSideProps<ConnectionStatus> = mongoDbConnection;
 
 export default ({ isConnected }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  const router = useRouter();
   const {
     user: { accessToken },
   } = useAuth0User();
@@ -26,7 +29,7 @@ export default ({ isConnected }: InferGetServerSidePropsType<typeof getServerSid
   const [openAddUserModal] = useModal(AddUserFormModal);
   const [openConfirmModal, closeConfirmModal] = useModal(ConfirmModal);
   const [openEditUserModal] = useModal(EditUserFormModal);
-  const { users, refetch } = useUsers();
+  const { users, loading, error, refetch } = useUsers();
 
   // Permissions
   const canCreateUsers = userHasPermission(Permissions.CreateUsers);
@@ -37,17 +40,17 @@ export default ({ isConnected }: InferGetServerSidePropsType<typeof getServerSid
 
   const handleEditUser = (
     user: Pick<Auth0User, 'user_id' | 'email' | 'name' | 'nickname' | 'role'>,
-  ) => openEditUserModal({ ...user });
+  ) => openEditUserModal({ ...user, refetch });
 
   const handleDeleteUser = async (userId: string) =>
     openConfirmModal({
       title: 'Delete user',
       description: "Are you sure want to delete this user? This action can't be reverted",
       onConfirm: () =>
-        fetch(`/api/users?userId=${userId}`, {
-          method: 'DELETE',
-          headers: { Authorization: `Bearer ${accessToken}` },
-        }).then(() => {
+        deleteUser(accessToken, userId).then((response) => {
+          if (!response.ok) {
+            // TODO: Handle error here...
+          }
           closeConfirmModal();
           refetch();
         }),
@@ -71,7 +74,30 @@ export default ({ isConnected }: InferGetServerSidePropsType<typeof getServerSid
         )}
 
         <Stack h='100%'>
-          {users ? (
+          {loading && !error && <Spinner label='Loading users...' />}
+
+          {error && (
+            <Center h='100%'>
+              <Stack align='center' gap='xs'>
+                <Text>Some error occurred...</Text>
+
+                <Text>
+                  {error.cause.statusCode} {error.cause.message}
+                </Text>
+
+                <Text>Please try again</Text>
+                <Button onClick={router.reload}>Refersh</Button>
+              </Stack>
+            </Center>
+          )}
+
+          {users && users.length === 0 && (
+            <Center h='100%'>
+              <Text>There are no users created yet.</Text>
+            </Center>
+          )}
+
+          {users && users.length > 0 && (
             <Flex style={{ overflow: 'auto' }}>
               <Table striped stickyHeader>
                 <Table.Thead>
@@ -130,8 +156,6 @@ export default ({ isConnected }: InferGetServerSidePropsType<typeof getServerSid
                 </Table.Tbody>
               </Table>
             </Flex>
-          ) : (
-            <Spinner label='Loading users...' />
           )}
         </Stack>
       </Stack>

@@ -6,8 +6,12 @@ import PopoverHint from 'components/popover-hint';
 import { Permissions, usePermissions } from 'permissions';
 import { useAuth0User } from 'providers/auth0-provider';
 import type { ModalBaseProps } from 'providers/modal/types';
+import updateUser from 'services/update-user';
 
-type Props = ModalBaseProps & Pick<Auth0User, 'user_id' | 'email' | 'name' | 'nickname' | 'role'>;
+type Props = ModalBaseProps &
+  Pick<Auth0User, 'user_id' | 'email' | 'name' | 'nickname' | 'role'> & {
+    refetch: () => void;
+  };
 
 type UserDto = {
   user_id: string;
@@ -21,7 +25,7 @@ type UserDto = {
 
 const roleSelectValue: Role[] = ['Viewer', 'Moderator', 'Admin'];
 
-export default (props: Props) => {
+export default ({ opened, onClose, refetch, ...userProps }: Props) => {
   const { userHasPermission } = usePermissions();
   const [submitLoading, setSubmitLoading] = useState<boolean>(false);
   const [updatePassword, setUpdatePassword] = useState<boolean>(false);
@@ -39,13 +43,10 @@ export default (props: Props) => {
     watch,
   } = useForm<UserDto>({
     values: {
-      user_id: props.user_id,
-      email: props.email,
-      name: props.name,
-      nickname: props.nickname,
+      ...userProps,
+      role: userProps.role || '',
       password: '',
       confirmPassword: '',
-      role: props.role,
     },
   });
 
@@ -58,34 +59,22 @@ export default (props: Props) => {
   const canAssignAdminUsers = userHasPermission(Permissions.AssignAdminUsers);
   const canUpdatePasswordUsers = userHasPermission(Permissions.UpdatePasswordUsers);
 
-  const onSubmit = async (data: UserDto) => {
+  const onSubmit = async (data: Omit<UserDto, 'confirmPassword'>) => {
     setSubmitLoading(true);
 
     try {
-      const response = await fetch(`/api/users`, {
-        method: 'PATCH',
-        body: JSON.stringify({
-          userId: data.user_id,
-          email: data.email,
-          name: data.name,
-          nickname: data.nickname,
-          updatePassword,
-          password: data.password,
-          role: data.role,
-        }),
-        headers: { Authorization: `Bearer ${accessToken}` },
-      }).then((res) => res.json());
+      await updateUser(accessToken, {
+        ...data,
+        userId: data.user_id,
+        updatePassword,
+      });
 
-      if (response.status >= 400) {
-        // TODO: Handle errors here...
-      } else {
-        props.onClose();
-        reset();
-      }
-
-      setSubmitLoading(false);
+      refetch();
+      onClose();
+      reset();
     } catch (error) {
-      console.log(error);
+      // TODO: Handle errors here...
+    } finally {
       setSubmitLoading(false);
     }
   };
@@ -109,7 +98,8 @@ export default (props: Props) => {
 
   return (
     <FormModal
-      {...props}
+      opened={opened}
+      onClose={onClose}
       disabled={isSubmitDisabled}
       formIsDirty={isDirty}
       loading={submitLoading}

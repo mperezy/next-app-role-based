@@ -3,6 +3,7 @@ import validateRequest from 'api-handlers/validate-request';
 import verifyRolePermissions from 'api-handlers/verify-role-permissions';
 import { assignRoleToUser, getUserById } from 'lib/database/user';
 import { Permissions } from 'permissions';
+import fetch from 'utils/fetch';
 import getAccessToken from 'utils/get-access-token';
 import parseError from 'utils/parse-error';
 
@@ -30,47 +31,51 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
     const userRole = userFromDB.role;
 
-    const response = await fetch(`${process.env.AUTH0_ISSUER_BASE_URL}/api/v2/users/${userId}`, {
+    await fetch(`${process.env.AUTH0_ISSUER_BASE_URL}/api/v2/users/${userId}`, {
       method: 'PATCH',
-      body: JSON.stringify({
+      body: {
         email,
         name,
         nickname,
-      }),
+      },
       headers: {
         Authorization: `Bearer ${accessToken}`,
         'Content-Type': 'application/json',
       },
-    }).then((res) => res.json());
-
-    if (response.statusCode && response.statusCode >= 400) {
-      res.status(response.statusCode).json({
-        status: response.statusCode,
-        message: response.message,
-      });
-      return;
-    }
+    });
 
     if (updatePassword) {
       await fetch(`${process.env.AUTH0_ISSUER_BASE_URL}/api/v2/users/${userId}`, {
         method: 'PATCH',
-        body: JSON.stringify({
+        body: {
           password,
-        }),
+        },
         headers: {
           Authorization: `Bearer ${accessToken}`,
           'Content-Type': 'application/json',
         },
-      }).then((res) => res.json());
+      });
     }
 
     if (userRole !== role) {
       await assignRoleToUser(userId, role);
     }
 
-    res.status(200).json({ message: 'User updated.' });
+    res.status(200).json({ message: 'User updated' });
   } catch (error) {
-    console.error({ error });
+    const fetchError = error as FetchError;
+    console.error('**** [PATCH] /api/users', { error: fetchError });
+
+    if (fetchError.cause.statusCode) {
+      if (fetchError.cause.statusCode! >= 400) {
+        res.status(fetchError.cause.statusCode!).json({
+          statusCode: fetchError.cause.statusCode,
+          message: fetchError.cause.message,
+        });
+        return;
+      }
+    }
+
     res.status(500).json({ status: 500, message: parseError(error).message });
   }
 };

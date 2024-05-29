@@ -27,6 +27,8 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
     res.status(204).json({ message: 'User deleted.' });
   } catch (error) {
+    console.log('**** [DELETE] /api/users', { error });
+
     res.status(500).json({ status: 500, message: parseError(error).message });
   }
 };
