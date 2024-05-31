@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import {
   AppShell,
   Box,
@@ -13,10 +14,11 @@ import {
   Stack,
   Text,
 } from '@mantine/core';
-import { useLocalStorage, useMediaQuery } from '@mantine/hooks';
+import { useHotkeys, useLocalStorage, useMediaQuery } from '@mantine/hooks';
 import routes from 'components/app-shell/routes';
 import UserDropdown from 'components/user-dropdown';
-import { useRouter } from 'next/router';
+import ThemeToggler from 'components/theme-toggler';
+import useTheme from 'hooks/use-theme';
 
 type Props = {
   children: ReactNode;
@@ -25,12 +27,15 @@ type Props = {
 
 export default ({ children, isDBConnected }: Props) => {
   const { route } = useRouter();
+  const { isLightTheme, handleToggleColorTheme } = useTheme();
   const isMobile = useMediaQuery(`(max-width: ${em(768)})`);
   const [navbarOpened, setNavbarOpened] = useLocalStorage({
     key: 'navbar-opened',
     getInitialValueInEffect: false,
     defaultValue: false,
   });
+
+  useHotkeys([['mod+J', handleToggleColorTheme]]);
 
   return (
     <AppShell
@@ -57,7 +62,11 @@ export default ({ children, isDBConnected }: Props) => {
               style={{ cursor: 'pointer' }}
             />
           </Flex>
-          <UserDropdown />
+
+          <Flex align='center' gap='lg'>
+            <ThemeToggler />
+            <UserDropdown />
+          </Flex>
         </Flex>
       </AppShell.Header>
 
@@ -79,7 +88,7 @@ export default ({ children, isDBConnected }: Props) => {
                   }
                 }}
               />
-              {index < arr.length - 1 && <Divider color='#CDCDCD' />}
+              {index < arr.length - 1 && <Divider color={isLightTheme ? '#CDCDCD' : '#424242'} />}
             </Stack>
           ))}
         </Stack>
